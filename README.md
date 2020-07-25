@@ -4,7 +4,7 @@
 
 `nlp-tutorial` is a tutorial for who is studying NLP(Natural Language Processing) using **TensorFlow** and **Pytorch**. Most of the models in NLP were implemented with less than **100 lines** of code.(except comments or blank lines)
 
-
+Forked from bog lao. To learn pytorch, nlp and pytorch-lightning.
 
 ## Curriculum - (Example Purpose)
 
