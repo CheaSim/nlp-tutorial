@@ -9,6 +9,7 @@ from torch.autograd import Variable
 
 dtype = torch.FloatTensor
 
+# 这次是字符级别的LSTM，对于单词的最后一个进行预测
 char_arr = [c for c in 'abcdefghijklmnopqrstuvwxyz']
 word_dict = {n: i for i, n in enumerate(char_arr)}
 number_dict = {i: w for i, w in enumerate(char_arr)}
@@ -17,6 +18,7 @@ n_class = len(word_dict) # number of class(=number of vocab)
 seq_data = ['make', 'need', 'coal', 'word', 'love', 'hate', 'live', 'home', 'hash', 'star']
 
 # TextLSTM Parameters
+# 所有的词都是4个字母组成，所以time 为3
 n_step = 3
 n_hidden = 128
 
@@ -29,25 +31,28 @@ def make_batch(seq_data):
         input_batch.append(np.eye(n_class)[input])
         target_batch.append(target)
 
-    return Variable(torch.Tensor(input_batch)), Variable(torch.LongTensor(target_batch))
+    return torch.Tensor(input_batch), torch.LongTensor(target_batch)
+
 
 class TextLSTM(nn.Module):
     def __init__(self):
         super(TextLSTM, self).__init__()
 
+        # 第一层LSTMc层
         self.lstm = nn.LSTM(input_size=n_class, hidden_size=n_hidden)
-        self.W = nn.Parameter(torch.randn([n_hidden, n_class]).type(dtype))
-        self.b = nn.Parameter(torch.randn([n_class]).type(dtype))
+        # 第二层FCN全连接层进行预测
+        self.l2 = nn.Linear(n_hidden, n_class)
 
     def forward(self, X):
+        # X 就是一个batch
         input = X.transpose(0, 1)  # X : [n_step, batch_size, n_class]
 
-        hidden_state = Variable(torch.zeros(1, len(X), n_hidden))   # [num_layers(=1) * num_directions(=1), batch_size, n_hidden]
-        cell_state = Variable(torch.zeros(1, len(X), n_hidden))     # [num_layers(=1) * num_directions(=1), batch_size, n_hidden]
+        hidden_state = torch.zeros(1, len(X), n_hidden)   # [num_layers(=1) * num_directions(=1), batch_size, n_hidden]
+        cell_state = torch.zeros(1, len(X), n_hidden)     # [num_layers(=1) * num_directions(=1), batch_size, n_hidden]
 
         outputs, (_, _) = self.lstm(input, (hidden_state, cell_state))
         outputs = outputs[-1]  # [batch_size, n_hidden]
-        model = torch.mm(outputs, self.W) + self.b  # model : [batch_size, n_class]
+        model = self.l2(outputs)
         return model
 
 input_batch, target_batch = make_batch(seq_data)

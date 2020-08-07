@@ -21,6 +21,7 @@ num_filters = 3
 sentences = ["i love you", "he loves me", "she likes baseball", "i hate you", "sorry for that", "this is awful"]
 labels = [1, 1, 1, 0, 0, 0]  # 1 is good, 0 is not good.
 
+# 老操作了
 word_list = " ".join(sentences).split()
 word_list = list(set(word_list))
 word_dict = {w: i for i, w in enumerate(word_list)}
@@ -79,7 +80,8 @@ for epoch in range(5000):
     output = model(input_batch)
 
     # output : [batch_size, num_classes], target_batch : [batch_size] (LongTensor, not one-hot)
-    loss = criterion(output, target_batch)
+    import IPython; IPython.embed(); exit(1)
+    loss = F.cross_entropy(output, target_batch)
     if (epoch + 1) % 1000 == 0:
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.6f}'.format(loss))
 
